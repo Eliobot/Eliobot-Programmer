@@ -1,3 +1,19 @@
+Python script to reflash the entire CircuitPython factory setup on Eliobot robots
+
+## First setup
+
+If not already installed, you will need [esptool](https://docs.espressif.com/projects/esptool/) to run the script
+
+Install with pip :
+
+```pip install esptool```
+
+Install with brew :
+
+``` brew install esptool ```
+
+## Run the script 
+
 Run once :
 
 ``` python3 eliobot_programmer.py ```
