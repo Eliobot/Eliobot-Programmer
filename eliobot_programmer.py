@@ -47,16 +47,16 @@ while True :
     print()
     print("Waiting for reset")
 
-    while not os.path.ismount("../../Volumes/TINYS2BOOT") :
+    while not os.path.ismount("/Volumes/TINYS2BOOT") :
         print(".", end='', flush=True)
         time.sleep(1)
     print()
 
-    os.system('cp '+(pathname)+'/firmware.uf2 ../../Volumes/TINYS2BOOT')
+    os.system('cp '+(pathname)+'/firmware.uf2 /Volumes/TINYS2BOOT')
     print()
     print("Copying files, please wait ")
 
-    while not os.path.ismount("../../Volumes/CIRCUITPY") :
+    while not os.path.ismount("/Volumes/CIRCUITPY") :
         print(".", end='', flush=True)
         time.sleep(1)
     print()
@@ -64,12 +64,12 @@ while True :
     os.system('diskutil rename "CIRCUITPY" "ELIOBOT"')
     print()
 
-    while not os.path.ismount("../../Volumes/ELIOBOT") :
+    while not os.path.ismount("/Volumes/ELIOBOT") :
         print("Waiting ELIOBOT")
         time.sleep(1)
 
-    os.system('rm  ../../Volumes/ELIOBOT/code.py')
-    os.system('cp -R '+(pathname)+'/code/ ../../Volumes/ELIOBOT')
+    os.system('rm  /Volumes/ELIOBOT/code.py')
+    os.system('cp -R '+(pathname)+'/code/ /Volumes/ELIOBOT')
 
     os.system('diskutil unmount "ELIOBOT"')
 
