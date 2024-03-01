@@ -3,20 +3,37 @@ import os
 import time
 import serial.tools.list_ports
 import argparse
+import subprocess
 
 pathname = os.path.dirname(os.path.realpath(__file__))
 
-
-
 # Create the parser
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description='Flash robot with latest firmware and optional library update.')
 
 # Add an argument
 parser.add_argument('--repeat', type=bool, required=False)
+parser.add_argument('--pull', action='store_true', help='Pull the latest library updates from git repository before flashing.')
 
 # Parse the argument
 args = parser.parse_args()
 
+if args.pull:
+    print("Pulling latest updates from git repository...")
+    subprocess.run(['git', '-C', 'code/lib', 'pull'])
+    print("Update completed.")
+    readme_path = os.path.join('code/lib', 'README.md')
+    if os.path.exists(readme_path):
+        os.remove(readme_path)
+        print("README.md deleted successfully.")
+    else:
+        print("README.md not found.")
+
+    gitignore_path = os.path.join('code/lib', '.gitignore')
+    if os.path.exists(gitignore_path):
+        os.remove(gitignore_path)
+        print(".gitignore deleted successfully.")
+    else:
+        print(".gitignore not found.")
 
 
 print(os.name)
