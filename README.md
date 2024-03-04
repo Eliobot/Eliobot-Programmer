@@ -21,3 +21,7 @@ Run once :
 Run forever :
 
 ``` python3 eliobot_programmer.py --repeat TRUE ```
+
+## Options
+
+- `--pull` : Pull the latest version of the Eliobot library from GitHub
