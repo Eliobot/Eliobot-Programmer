@@ -25,3 +25,5 @@ Run forever :
 ## Options
 
 - `--pull` : Pull the latest version of the Eliobot library from GitHub
+
+if you have problems pulling the library, you can delete the `lib` folder and run the script again
