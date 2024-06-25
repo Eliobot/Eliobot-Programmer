@@ -12,68 +12,77 @@ parser = argparse.ArgumentParser(description='Flash robot with latest firmware a
 
 # Add an argument
 parser.add_argument('--repeat', type=bool, required=False)
-parser.add_argument('--pull', action='store_true', help='Pull the latest library updates from git repository before flashing.')
+parser.add_argument('--pull', action='store_true',
+                    help='Pull the latest library updates from git repository before flashing.')
 
 # Parse the argument
 args = parser.parse_args()
 
+
+def update_library_repo(lib_path, git_url):
+    os.makedirs(lib_path, exist_ok=True)
+
+    # check if the directory is empty
+    if not os.listdir(lib_path):
+        subprocess.run(['git', 'clone', git_url, lib_path], check=True)
+    else:
+        os.chdir(lib_path)
+        subprocess.run(['git', 'pull'], check=True)
+
+    # Remove unnecessary files
+    for filename in ['README.md', '.gitignore']:
+        file_path = os.path.join(lib_path, filename)
+        try:
+            os.remove(file_path)
+            print(f"{filename} deleted.")
+        except FileNotFoundError:
+            print(f"{filename} not found")
+
+
 if args.pull:
-    print("Pulling latest updates from git repository...")
-    subprocess.run(['git', '-C', 'code/lib', 'pull'])
-    print("Update completed.")
-    readme_path = os.path.join('code/lib', 'README.md')
-    if os.path.exists(readme_path):
-        os.remove(readme_path)
-        print("README.md deleted successfully.")
-    else:
-        print("README.md not found.")
-
-    gitignore_path = os.path.join('code/lib', '.gitignore')
-    if os.path.exists(gitignore_path):
-        os.remove(gitignore_path)
-        print(".gitignore deleted successfully.")
-    else:
-        print(".gitignore not found.")
-
+    lib_directory = 'code/lib'
+    repository_url = 'https://github.com/Eliobot/Eliobot-Python-Library.git'
+    update_library_repo(lib_directory, repository_url)
 
 print(os.name)
 
 print(platform.platform())
 
-
-while True :
+while True:
     print()
     print("Waiting for Serial")
 
     serialFound = False
 
-    while not serialFound :
+    while not serialFound:
         ports = serial.tools.list_ports.comports()
         for p in ports:
-            if p.device == "/dev/cu.usbmodem01" :
+            if p.device == "/dev/cu.usbmodem01":
                 serialFound = True
-            else :
+            else:
                 print(".", end='', flush=True)
         time.sleep(1)
     print()
     print("Found!")
 
-    os.system('esptool.py -p /dev/cu.usbmodem01 erase_flash; esptool.py -p /dev/cu.usbmodem01 --after hard_reset write_flash 0x0 '+(pathname)+'/eliobot.bin')
+    os.system(
+        'esptool.py -p /dev/cu.usbmodem01 erase_flash; esptool.py -p /dev/cu.usbmodem01 --after hard_reset write_flash 0x0 ' + (
+            pathname) + '/eliobot.bin')
 
     os.system('afplay /System/Library/Sounds/Funk.aiff')
     print()
     print("Waiting for reset")
 
-    while not os.path.ismount("/Volumes/TINYS2BOOT") :
+    while not os.path.ismount("/Volumes/TINYS2BOOT"):
         print(".", end='', flush=True)
         time.sleep(1)
     print()
 
-    os.system('cp '+(pathname)+'/firmware.uf2 /Volumes/TINYS2BOOT')
+    os.system('cp ' + (pathname) + '/firmware.uf2 /Volumes/TINYS2BOOT')
     print()
     print("Copying files, please wait ")
 
-    while not os.path.ismount("/Volumes/CIRCUITPY") :
+    while not os.path.ismount("/Volumes/CIRCUITPY"):
         print(".", end='', flush=True)
         time.sleep(1)
     print()
@@ -81,12 +90,12 @@ while True :
     os.system('diskutil rename "CIRCUITPY" "ELIOBOT"')
     print()
 
-    while not os.path.ismount("/Volumes/ELIOBOT") :
+    while not os.path.ismount("/Volumes/ELIOBOT"):
         print("Waiting ELIOBOT")
         time.sleep(1)
 
     os.system('rm  /Volumes/ELIOBOT/code.py')
-    os.system('cp -R '+(pathname)+'/code/ /Volumes/ELIOBOT')
+    os.system('cp -R ' + (pathname) + '/code/ /Volumes/ELIOBOT')
 
     os.system('diskutil unmount "ELIOBOT"')
 
@@ -95,6 +104,5 @@ while True :
     print("Job done !")
     print()
 
-
-    if not args.repeat :
+    if not args.repeat:
         break
