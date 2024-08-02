@@ -55,4 +55,3 @@ while True:
         pixels.fill((51, 204, 0))
         pixels.show()
         elio.move_forward(speed)
-
