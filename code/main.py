@@ -112,7 +112,7 @@ def followHand():
         init_obstacle_pin()
         isObstacleInitialized = True
         isIRInitialized = False
-    pixels.fill((51, 102, 255))
+    pixels.fill((0, 0, 255))
     pixels.show()
     if obstacleSensor.get_obstacle(1):
         motors.move_forward(speed)
@@ -132,7 +132,7 @@ def followHand():
 
 def doNotFall():
     global prog
-    pixels.fill((255, 102, 0))
+    pixels.fill((128, 0, 128))
     pixels.show()
     if (lineSensor.get_line(2) < 10000 or lineSensor.get_line(0) < 10000 or lineSensor.get_line(
             4) < 10000) and not buttonPin.value == False:
@@ -155,7 +155,7 @@ def irRemote():
         isObstacleInitialized = False
     code = decoder.decode_signal()
 
-    pixels.fill((255, 255, 255))
+    pixels.fill((255, 255, 0))
     pixels.show()
 
     if code == ir_signals.signal_up:
@@ -196,7 +196,7 @@ while True:
 
     else:
         if prog == 1:
-            pixels.fill((51, 204, 0))
+            pixels.fill((0, 255, 0))
             pixels.show()
             if lineSensor.get_line(2) < seuil:
                 pixels.fill((51, 255, 51))
