@@ -24,6 +24,6 @@ Run forever :
 
 ## Options
 
-- `--nopull` : Do not pull automatically ElioBot library
+- `--nopull` : Do not pull ElioBot library automatically
 
 if you have problems pulling the library, you can delete the `lib` folder and run the script again
