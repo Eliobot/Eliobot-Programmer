@@ -1,5 +1,6 @@
 import platform
 import os
+import shutil
 import time
 import serial.tools.list_ports
 import argparse
@@ -11,35 +12,40 @@ pathname = os.path.dirname(os.path.realpath(__file__))
 parser = argparse.ArgumentParser(description='Flash robot with latest firmware and optional library update.')
 
 # Add an argument
-parser.add_argument('--repeat', type=bool, required=False)
-parser.add_argument('--pull', action='store_true',
+parser.add_argument('--repeat', action='store_true', required=False)
+parser.add_argument('--nopull', action='store_true',
                     help='Pull the latest library updates from git repository before flashing.')
 
 # Parse the argument
 args = parser.parse_args()
 
 
-def update_library_repo(lib_path, git_url):
+def update_library_repo(lib_path, git_url, branch='dev'):
     os.makedirs(lib_path, exist_ok=True)
 
-    # check if the directory is empty
-    if not os.listdir(lib_path):
-        subprocess.run(['git', 'clone', git_url, lib_path], check=True)
-    else:
-        os.chdir(lib_path)
-        subprocess.run(['git', 'pull'], check=True)
+    shutil.rmtree(lib_path, ignore_errors=True)
+
+    # Clone the specific branch if the directory is empty
+    subprocess.run(['git', 'clone', '--branch', branch, git_url, lib_path], check=True)
+    os.chdir(lib_path)
 
     # Remove unnecessary files
-    for filename in ['README.md', '.gitignore']:
-        file_path = os.path.join(lib_path, filename)
+    for filename in ['README.md', '.gitignore', '.git']:
         try:
-            os.remove(file_path)
-            print(f"{filename} deleted.")
+            # Check if it's a directory
+            if os.path.isdir(filename):
+                shutil.rmtree(filename)  # Remove directory
+                print(f"{filename} directory deleted.")
+            else:
+                os.remove(filename)  # Remove file
+                print(f"{filename} file deleted.")
         except FileNotFoundError:
             print(f"{filename} not found")
+        except PermissionError:
+            print(f"Permission denied while trying to delete {filename}")
 
 
-if args.pull:
+if not args.nopull:
     lib_directory = 'code/lib'
     repository_url = 'https://github.com/Eliobot/Eliobot-Python-Library.git'
     update_library_repo(lib_directory, repository_url)
@@ -66,34 +72,22 @@ while True:
     print("Found!")
 
     os.system(
-        'esptool.py -p /dev/cu.usbmodem01 erase_flash; esptool.py -p /dev/cu.usbmodem01 --after hard_reset write_flash 0x0 ' + (
-            pathname) + '/eliobot.bin')
+        'esptool.py -p /dev/cu.usbmodem01 erase_flash;' +
+        ' esptool.py -p /dev/cu.usbmodem01 --after hard_reset write_flash 0x0 ' + (
+            pathname) + '/firmware-mass-storage.bin')
 
     os.system('afplay /System/Library/Sounds/Funk.aiff')
     print()
     print("Waiting for reset")
 
-    while not os.path.ismount("/Volumes/TINYS2BOOT"):
+    while not os.path.ismount("/Volumes/ELIOBOT"):
         print(".", end='', flush=True)
         time.sleep(1)
     print()
 
-    os.system('cp ' + (pathname) + '/firmware.uf2 /Volumes/TINYS2BOOT')
-    print()
     print("Copying files, please wait ")
 
-    while not os.path.ismount("/Volumes/CIRCUITPY"):
-        print(".", end='', flush=True)
-        time.sleep(1)
-    print()
-
-    os.system('diskutil rename "CIRCUITPY" "ELIOBOT"')
-    print()
-
-    while not os.path.ismount("/Volumes/ELIOBOT"):
-        print("Waiting ELIOBOT")
-        time.sleep(1)
-
+    os.system('rm -rf  /Volumes/ELIOBOT/sd')
     os.system('rm  /Volumes/ELIOBOT/code.py')
     os.system('cp -R ' + (pathname) + '/code/ /Volumes/ELIOBOT')
 
