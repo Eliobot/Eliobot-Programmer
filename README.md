@@ -20,7 +20,7 @@ Run once :
 
 Run forever :
 
-``` python3 eliobot_programmer.py --repeat TRUE ```
+``` python3 eliobot_programmer.py --repeat```
 
 ## Options
 
