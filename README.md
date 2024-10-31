@@ -1,4 +1,4 @@
-Python script to flash the entire CircuitPython factory setup on Eliobot robots
+Python script to flash the entire CircuitPython 9.1.2 factory setup on Eliobot robots
 
 ## First setup
 
