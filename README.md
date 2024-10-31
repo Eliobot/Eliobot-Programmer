@@ -1,4 +1,4 @@
-Python script to reflash the entire CircuitPython factory setup on Eliobot robots
+Python script to flash the entire CircuitPython factory setup on Eliobot robots
 
 ## First setup
 
@@ -20,10 +20,10 @@ Run once :
 
 Run forever :
 
-``` python3 eliobot_programmer.py --repeat TRUE ```
+``` python3 eliobot_programmer.py --repeat```
 
 ## Options
 
-- `--pull` : Pull the latest version of the Eliobot library from GitHub
+- `--nopull` : Do not pull ElioBot library automatically
 
 if you have problems pulling the library, you can delete the `lib` folder and run the script again
