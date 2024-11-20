@@ -137,11 +137,24 @@ def is_volume_mounted(volume_name):
         bool: True if the volume is mounted, False otherwise.
     """
     if os.name == 'nt':  # Windows
-        drive_letters = [f"{chr(letter)}:\\" for letter in range(65, 91)]
-        for drive in drive_letters:
-            if os.path.exists(drive) and volume_name in drive:
-                return True
-        return False
+        try:
+            # Exécuter la commande pour obtenir les lecteurs montés
+            result = subprocess.run(['wmic', 'logicaldisk', 'get', 'caption'], stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE, text=True)
+            if result.returncode != 0:
+                print(f"Error checking drives: {result.stderr}")
+                return False
+
+            # Récupérer la sortie et vérifier si le volume est monté
+            drives = result.stdout.splitlines()
+            for drive in drives:
+                drive = drive.strip()
+                if volume_name in drive:
+                    return True
+            return False
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return False
     else:  # macOS/Linux
         return os.path.ismount(f"/Volumes/{volume_name}")
 
