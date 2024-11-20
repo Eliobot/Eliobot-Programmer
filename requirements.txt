@@ -1,0 +1,4 @@
+pyserial
+shutil
+subprocess
+esptool

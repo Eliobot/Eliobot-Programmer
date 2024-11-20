@@ -2,15 +2,9 @@ Python script to flash the entire CircuitPython factory setup on Eliobot robots
 
 ## First setup
 
-If not already installed, you will need [esptool](https://docs.espressif.com/projects/esptool/) to run the script
+Install the required libraries :
 
-Install with pip :
-
-```pip install esptool```
-
-Install with brew :
-
-``` brew install esptool ```
+``` pip3 install -r requirements.txt ```
 
 ## Run the script 
 
