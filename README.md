@@ -27,3 +27,37 @@ Run forever :
 - `--nopull` : Do not pull ElioBot library automatically
 
 if you have problems pulling the library, you can delete the `lib` folder and run the script again
+
+
+## Raspberry Pi setup
+
+### First install
+
+Create Python Environment :
+
+``` python -m venv esptoolenv ```
+
+Activate the environment :
+
+``` source esptoolenv/bin/activate ```
+
+Install esptool :
+
+``` pip install esptool ```
+
+
+### Running the script
+
+Don't forget to reactivate the environment at each new session : 
+
+``` source esptoolenv/bin/activate ```
+
+Then you can erase the flash :
+
+``` esptool.py erase_flash ```
+
+Or write a binary :
+
+``` esptool.py write_flash 0x0 firmware-mass-storage.bin ```
+
+
