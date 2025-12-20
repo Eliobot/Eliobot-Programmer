@@ -62,7 +62,7 @@ while True:
     while not serialFound:
         ports = serial.tools.list_ports.comports()
         for p in ports:
-            if p.device == "/dev/cu.usbmodem01":
+            if p.device.startswith("/dev/cu.usbmodem"):
                 serialFound = True
             else:
                 print(".", end='', flush=True)
@@ -70,10 +70,50 @@ while True:
     print()
     print("Found!")
 
-    os.system(
-        'esptool.py -p /dev/cu.usbmodem01 erase_flash;' +
-        ' esptool.py -p /dev/cu.usbmodem01 --after hard_reset write_flash 0x0 ' + (
-            pathname) + '/firmware-mass-storage.bin')
+    print("Erasing flash...")
+    # Erase flash and capture output to determine chip type
+    result = subprocess.run(['esptool', 'erase-flash'], capture_output=True, text=True)
+    print(result.stdout)  # Print the erase-flash output
+
+    # Parse chip type from output
+    chip_type = None
+    for line in result.stdout.split('\n'):
+        if 'Chip type:' in line:
+            chip_type = line.split('Chip type:')[1].strip()  # e.g., "ESP32-S3"
+            break
+
+    # Choose firmware based on chip type
+    if chip_type and 'ESP32-S3' in chip_type:
+        firmware_file = 'Eliobot_S3/fw_eliobot_s3_noREPL.bin'
+        code_dir = 'Eliobot_S3/code-S3'
+    elif chip_type and 'ESP32-S2' in chip_type:
+        firmware_file = 'Eliobot_S2/fw_eliobot_s2_noREPL.bin'
+        code_dir = 'Eliobot_S2/code-S2'
+    else:
+        firmware_file = 'fw_eliobot_s3_noREPL.bin'  # Default fallback
+        code_dir = 'Eliobot_S3/code-S3'  # Default fallback
+
+    print(f"Detected chip: {chip_type}, using firmware: {firmware_file} and code dir: {code_dir}")
+
+
+    print()
+    print("Waiting for Serial")
+
+    serialFound = False
+
+    while not serialFound:
+        ports = serial.tools.list_ports.comports()
+        for p in ports:
+            if p.device.startswith("/dev/cu.usbmodem"):
+                serialFound = True
+            else:
+                print(".", end='', flush=True)
+        time.sleep(1)
+    print()
+    print("Found!")
+    
+    # Write flash with the chosen firmware
+    subprocess.run(['esptool', '--after', 'hard-reset', 'write-flash', '0x0', os.path.join(pathname, firmware_file)])
 
     os.system('afplay /System/Library/Sounds/Funk.aiff')
     print()
@@ -86,9 +126,7 @@ while True:
 
     print("Copying files, please wait ")
 
-    os.system('rm -rf  /Volumes/ELIOBOT/sd')
-    os.system('rm  /Volumes/ELIOBOT/code.py')
-    os.system('cp -R ' + (pathname) + '/code/ /Volumes/ELIOBOT')
+    os.system('cp -R ' + (pathname) + '/' + code_dir + '/ /Volumes/ELIOBOT')
 
     os.system('diskutil unmount "ELIOBOT"')
 
