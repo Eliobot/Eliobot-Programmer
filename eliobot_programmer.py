@@ -15,6 +15,12 @@ parser = argparse.ArgumentParser(description='Flash robot with latest firmware a
 parser.add_argument('--repeat', action='store_true', required=False)
 parser.add_argument('--nopull', action='store_true',
                     help='Pull the latest library updates from git repository before flashing.')
+parser.add_argument(
+    '--chip',
+    choices=['s2', 's3'],
+    default='s3',
+    help='Choisir la carte à flasher: s2 ou s3 (défaut: s3).'
+)
 
 # Parse the argument
 args = parser.parse_args()
@@ -53,6 +59,23 @@ print(os.name)
 
 print(platform.platform())
 
+chip_cfg = {
+    's2': {
+        'port': '/dev/cu.usbmodem01',
+        'firmware': 'Eliobot_S2/fw_eliobot_s2_noREPL.bin',
+        'code_dir': 'Eliobot_S2/code'
+    },
+    's3': {
+        'port': '/dev/cu.usbmodem14101',
+        'firmware': 'Eliobot_S3/fw_eliobot_s3_noREPL.bin',
+        'code_dir': 'Eliobot_S3/code'
+    }
+}
+cfg = chip_cfg[args.chip]
+serial_port = cfg['port']
+firmware = cfg['firmware']
+code_dir = cfg['code_dir']
+
 while True:
     print()
     print("Waiting for Serial")
@@ -62,7 +85,7 @@ while True:
     while not serialFound:
         ports = serial.tools.list_ports.comports()
         for p in ports:
-            if p.device == "/dev/cu.usbmodem01":
+            if p.device == serial_port:
                 serialFound = True
             else:
                 print(".", end='', flush=True)
@@ -71,9 +94,8 @@ while True:
     print("Found!")
 
     os.system(
-        'esptool.py -p /dev/cu.usbmodem01 erase_flash;' +
-        ' esptool.py -p /dev/cu.usbmodem01 --after hard_reset write_flash 0x0 ' + (
-            pathname) + '/firmware-mass-storage.bin')
+        'esptool -p ' + serial_port + ' erase-flash;' +
+        'esptool -p ' + serial_port + ' --after hard-reset write-flash 0x0 ' + (pathname) + '/' + firmware)
 
     os.system('afplay /System/Library/Sounds/Funk.aiff')
     print()
@@ -86,9 +108,7 @@ while True:
 
     print("Copying files, please wait ")
 
-    os.system('rm -rf  /Volumes/ELIOBOT/sd')
-    os.system('rm  /Volumes/ELIOBOT/code.py')
-    os.system('cp -R ' + (pathname) + '/code/ /Volumes/ELIOBOT')
+    os.system('cp -R ' + (pathname) + '/' + code_dir + '/ /Volumes/ELIOBOT')
 
     os.system('diskutil unmount "ELIOBOT"')
 
