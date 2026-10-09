@@ -27,7 +27,9 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def update_library_repo(lib_path, git_url, branch='dev'):
+# main: the version Elioblocs installs and checks against. dev stopped at
+# elio 3.1, without EyesMatrix, which every Elioblocs program imports.
+def update_library_repo(lib_path, git_url, branch='main'):
     # Clone into a temp dir first — if clone fails, existing lib is preserved
     tmp_path = lib_path + '_tmp'
     shutil.rmtree(tmp_path, ignore_errors=True)
